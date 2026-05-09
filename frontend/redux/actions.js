@@ -1,0 +1,135 @@
+// ── MOVIES ──────────────────────────────────────
+export const SET_MOVIES          = "SET_MOVIES";
+export const SET_POPULAR_MOVIES  = "SET_POPULAR_MOVIES";
+export const SET_SELECTED_MOVIE  = "SET_SELECTED_MOVIE";
+export const SET_MOVIES_LOADING  = "SET_MOVIES_LOADING";
+export const SET_MOVIES_ERROR    = "SET_MOVIES_ERROR";
+
+const API = "http://192.168.1.167:5555/api/v1";
+
+export const fetchPopularMovies = () => async (dispatch) => {
+    dispatch({ type: SET_MOVIES_LOADING, payload: true });
+    try {
+        const res  = await fetch(`${API}/movies/popular`);
+        const data = await res.json();
+        dispatch({ type: SET_POPULAR_MOVIES, payload: data });
+        dispatch({ type: SET_MOVIES,         payload: data });
+    } catch (err) {
+        dispatch({ type: SET_MOVIES_ERROR, payload: err.message });
+    } finally {
+        dispatch({ type: SET_MOVIES_LOADING, payload: false });
+    }
+};
+
+export const fetchMovies = (params = {}) => async (dispatch) => {
+    dispatch({ type: SET_MOVIES_LOADING, payload: true });
+    try {
+        const query = new URLSearchParams(params).toString();
+        const res   = await fetch(`${API}/movies?${query}`);
+        const data  = await res.json();
+        dispatch({ type: SET_MOVIES, payload: data });
+    } catch (err) {
+        dispatch({ type: SET_MOVIES_ERROR, payload: err.message });
+    } finally {
+        dispatch({ type: SET_MOVIES_LOADING, payload: false });
+    }
+};
+
+export const fetchMovieById = (id) => async (dispatch) => {
+    try {
+        const res  = await fetch(`${API}/movies/${id}`);
+        const data = await res.json();
+        dispatch({ type: SET_SELECTED_MOVIE, payload: data });
+    } catch (err) {
+        dispatch({ type: SET_MOVIES_ERROR, payload: err.message });
+    }
+};
+
+// ── AUTH ─────────────────────────────────────────
+export const SET_USER         = "SET_USER";
+export const SET_TOKEN        = "SET_TOKEN";
+export const SET_AUTH_LOADING = "SET_AUTH_LOADING";
+export const SET_AUTH_ERROR   = "SET_AUTH_ERROR";
+export const LOGOUT           = "LOGOUT";
+
+export const login = (email, password) => async (dispatch) => {
+    dispatch({ type: SET_AUTH_LOADING, payload: true });
+    try {
+        const res  = await fetch(`${API}/auth/login`, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        dispatch({ type: SET_TOKEN, payload: data.token });
+        dispatch({ type: SET_USER,  payload: data.user  });
+        dispatch({ type: SET_AUTH_ERROR, payload: null  });
+    } catch (err) {
+        dispatch({ type: SET_AUTH_ERROR, payload: err.message });
+    } finally {
+        dispatch({ type: SET_AUTH_LOADING, payload: false });
+    }
+};
+
+export const register = (full_name, email, password) => async (dispatch) => {
+    dispatch({ type: SET_AUTH_LOADING, payload: true });
+    try {
+        const res  = await fetch(`${API}/auth/register`, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ full_name, email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        dispatch({ type: SET_AUTH_ERROR, payload: null });
+        return true;
+    } catch (err) {
+        dispatch({ type: SET_AUTH_ERROR, payload: err.message });
+        return false;
+    } finally {
+        dispatch({ type: SET_AUTH_LOADING, payload: false });
+    }
+};
+
+export const logout = () => ({ type: LOGOUT });
+
+// ── FAVORITES ────────────────────────────────────
+export const SET_FAVORITES         = "SET_FAVORITES";
+export const ADD_FAVORITE          = "ADD_FAVORITE";
+export const REMOVE_FAVORITE       = "REMOVE_FAVORITE";
+export const SET_FAVORITES_LOADING = "SET_FAVORITES_LOADING";
+
+export const fetchFavorites = (token) => async (dispatch) => {
+    dispatch({ type: SET_FAVORITES_LOADING, payload: true });
+    try {
+        const res  = await fetch(`${API}/favorites`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        dispatch({ type: SET_FAVORITES, payload: data });
+    } catch (err) {} finally {
+        dispatch({ type: SET_FAVORITES_LOADING, payload: false });
+    }
+};
+
+export const addFavorite = (movieId, token) => async (dispatch) => {
+    try {
+        const res = await fetch(`${API}/favorites`, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body:    JSON.stringify({ movie_id: movieId }),
+        });
+        if (res.ok) dispatch({ type: ADD_FAVORITE, payload: movieId });
+    } catch (err) {}
+};
+
+export const removeFavorite = (movieId, token) => async (dispatch) => {
+    try {
+        await fetch(`${API}/favorites/${movieId}`, {
+            method:  "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        dispatch({ type: REMOVE_FAVORITE, payload: movieId });
+    } catch (err) {}
+};
