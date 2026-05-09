@@ -173,7 +173,21 @@ app.get("/api/v1/movies", (req, res) => {
 
     con.query(sql, params, (err, movies) => {
         if (err) return res.status(500).send(err);
-        res.status(200).send(movies);
+        if (movies.length === 0) return res.status(200).send([]);
+
+        var ids = movies.map(m => m.id);
+        var genreSql = `SELECT mg.movie_id, g.name 
+                        FROM movie_genres mg 
+                        JOIN genres g ON mg.genre_id = g.id 
+                        WHERE mg.movie_id IN (?)`;
+        con.query(genreSql, [ids], (err, genreRows) => {
+            if (err) return res.status(500).send(err);
+            var result = movies.map(m => ({
+                ...m,
+                genres: genreRows.filter(g => g.movie_id === m.id).map(g => g.name)
+            }));
+            res.status(200).send(result);
+        });
     });
 });
 
@@ -279,4 +293,4 @@ app.put("/api/v1/history", authMiddleware, (req, res) => {
 });
 
 // ──────────────────────────────────────────────────────────
-app.listen(5555, () => console.log("MovieApp Server running at http://192.168.1.167:5555"));
+app.listen(5555, () => console.log("MovieApp Server running at http://192.168.1.63:5555"));
