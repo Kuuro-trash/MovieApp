@@ -164,7 +164,7 @@ app.put("/api/v1/auth/profile", authMiddleware, (req, res) => {
 
 // GET /api/v1/movies/popular
 app.get("/api/v1/movies/popular", (req, res) => {
-    var sql = "SELECT * FROM movies ORDER BY view_count DESC, rating DESC LIMIT 10";
+    var sql = "SELECT * FROM movies ORDER BY view_count DESC, rating DESC LIMIT 15";
     con.query(sql, (err, movies) => {
         if (err) return res.status(500).send(err);
         if (movies.length === 0) return res.status(200).send([]);
@@ -189,7 +189,7 @@ app.get("/api/v1/movies", (req, res) => {
     var search   = req.query.search   || "";
     var genre_id = req.query.genre_id || "";
     var page     = parseInt(req.query.page)  || 1;
-    var limit    = parseInt(req.query.limit) || 10;
+    var limit    = parseInt(req.query.limit) || 20;
     var offset   = (page - 1) * limit;
 
     var sql    = "SELECT DISTINCT m.* FROM movies m";

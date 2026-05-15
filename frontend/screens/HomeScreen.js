@@ -55,9 +55,11 @@ const HomeScreen = ({ navigation }) => {
     }, [search, activeGenre]);
 
     const baseMovies    = apiMovies.length > 0 ? apiMovies : MOCK_MOVIES;
-    const displayMovies = baseMovies
-        .map(m => ({ ...m, image: ASSETS_MAP[m.title] || m.image }))
-        .filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
+    const displayMovies = baseMovies.map(m => ({
+        ...m,
+        // Chỉ gán local asset nếu có, KHÔNG ghi đè poster_url của phim API
+        image: ASSETS_MAP[m.title] || m.image || null,
+    }));
 
     // Header: SearchBar + chip thể loại + tiêu đề section
     // Đặt vào ListHeaderComponent để nằm trong cùng FlatList,

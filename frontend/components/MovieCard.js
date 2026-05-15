@@ -21,6 +21,8 @@ function resolveSource(title, poster_url, image) {
 
 const MovieCard = ({ title, genre, year, rating, image, poster_url, isFavorite, onPress, onToggleFavorite }) => {
     const source = resolveSource(title, poster_url, image);
+    // Chỉ hiện nút tim khi đây là context yêu thích (isFavorite được truyền rõ ràng, kể cả false)
+    const showHeart = typeof isFavorite !== "undefined" && onToggleFavorite;
 
     return (
         <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
@@ -46,7 +48,7 @@ const MovieCard = ({ title, genre, year, rating, image, poster_url, isFavorite, 
                 </View>
             </View>
 
-            {onToggleFavorite && (
+            {showHeart && (
                 <TouchableOpacity style={styles.heart} onPress={onToggleFavorite}>
                     <Ionicons
                         name={isFavorite ? "heart" : "heart-outline"}

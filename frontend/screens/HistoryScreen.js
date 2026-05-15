@@ -88,15 +88,21 @@ const HistoryScreen = ({ navigation }) => {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
                     <View>
-                        <MovieCard
-                            title={item.title}
-                            genre={item.genres ? item.genres.join(", ") : item.genre}
-                            year={item.year}
-                            rating={item.rating}
-                            poster_url={item.poster_url}
-                            onPress={() => navigation.navigate("VideoPlayer", { movie: item, startAt: item.progress_seconds })}
-                            onToggleFavorite={() => handleDelete(item)}
-                        />
+                        <View style={styles.cardRow}>
+                            <View style={styles.cardFlex}>
+                                <MovieCard
+                                    title={item.title}
+                                    genre={item.genres ? item.genres.join(", ") : item.genre}
+                                    year={item.year}
+                                    rating={item.rating}
+                                    poster_url={item.poster_url}
+                                    onPress={() => navigation.navigate("VideoPlayer", { movie: item, startAt: item.progress_seconds })}
+                                />
+                            </View>
+                            <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item)}>
+                                <Ionicons name="trash-outline" size={20} color="#555" />
+                            </TouchableOpacity>
+                        </View>
                         {/* Thanh tiến trình */}
                         <View style={styles.progressWrap}>
                             <View style={styles.progressBar}>
@@ -140,6 +146,19 @@ const styles = StyleSheet.create({
     list: {
         paddingHorizontal: 16,
         paddingBottom: 24,
+    },
+    cardRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    cardFlex: {
+        flex: 1,
+    },
+    deleteBtn: {
+        paddingHorizontal: 12,
+        paddingVertical: 20,
+        justifyContent: "center",
+        alignItems: "center",
     },
     progressWrap: {
         marginTop: -10,
